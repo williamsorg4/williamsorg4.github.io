@@ -100,37 +100,52 @@ function setupIndex() {
 }
 
 /* ── 4. Photo carousel ────────────────────────────────────────
-   Native horizontal scroll with snap; arrows, counter, and mouse drag. */
+   Native horizontal scroll with snap; arrows, counter, and mouse drag.
+   Loops seamlessly: a copy of the photos sits on each side of the real
+   set, and once scrolling stops we jump (invisibly) back to the same
+   photo in the middle set, so the first photo always follows the last. */
 function setupCarousel() {
   const track = document.querySelector(".carousel");
   if (!track) return;
-  const figs = [...track.children];
+  const real = [...track.children];
+  const n = real.length;
   const pos = document.querySelector(".off .pos");
   const prev = document.querySelector(".off .prev");
   const next = document.querySelector(".off .next");
   const pad = n => String(n).padStart(2, "0");
 
+  // copies for the loop, hidden from screen readers (nothing in them is focusable)
+  const copy = () => real.map(f => {
+    const c = f.cloneNode(true);
+    c.setAttribute("aria-hidden", "true");
+    return c;
+  });
+  // pin each photo's size before copying, so copies match their originals exactly
+  real.forEach((f, i) => { if (i % 3) f.classList.add(i % 3 === 1 ? "short" : "medium"); });
+  track.prepend(...copy());
+  track.append(...copy());
+  track.classList.add("looped");
+  const figs = [...track.children];                       // copies, real set, copies
+  const x = i => figs[i].offsetLeft - figs[0].offsetLeft;  // scroll position of photo i
+  const setWidth = () => x(n);                             // width of one full set
+
   const current = () => {
     const left = track.scrollLeft + 1;
     let idx = 0;
-    figs.forEach((f, i) => { if (f.offsetLeft - figs[0].offsetLeft <= left) idx = i; });
+    figs.forEach((f, i) => { if (x(i) <= left) idx = i; });
     return idx;
   };
-  // room at the end so the last photo can line up with the left edge too
-  const fitEnd = () => {
-    const last = figs[figs.length - 1];
-    const padL = parseFloat(getComputedStyle(track).paddingLeft);
-    track.style.paddingRight = `${Math.max(padL, track.clientWidth - last.offsetWidth - padL)}px`;
-  };
-  const update = () => {
+  // jump to the same photo in the middle set without animating
+  const recenter = () => {
     const i = current();
-    pos.textContent = `${pad(i + 1)} / ${pad(figs.length)}`;
-    prev.disabled = i === 0;
-    next.disabled = i === figs.length - 1;
+    if (i >= n && i < 2 * n) return;
+    const w = setWidth();
+    track.scrollLeft += i < n ? w : -w;
   };
+  const update = () => { pos.textContent = `${pad(current() % n + 1)} / ${pad(n)}`; };
   const go = d => {
-    const i = Math.max(0, Math.min(figs.length - 1, current() + d));
-    track.scrollTo({ left: figs[i].offsetLeft - figs[0].offsetLeft, behavior: "smooth" });
+    recenter();
+    track.scrollTo({ left: x(current() + d), behavior: "smooth" });
   };
   prev.addEventListener("click", () => go(-1));
   next.addEventListener("click", () => go(1));
@@ -138,10 +153,22 @@ function setupCarousel() {
     if (e.key === "ArrowRight") { e.preventDefault(); go(1); }
     if (e.key === "ArrowLeft") { e.preventDefault(); go(-1); }
   });
-  track.addEventListener("scroll", () => requestAnimationFrame(update), { passive: true });
-  addEventListener("resize", () => { fitEnd(); update(); });
-  addEventListener("load", fitEnd);
-  fitEnd();
+
+  // recenter once scrolling settles (scrollend where supported, else a short pause)
+  let settle;
+  const settled = () => { if (!dragging) recenter(); };
+  track.addEventListener("scroll", () => {
+    requestAnimationFrame(update);
+    clearTimeout(settle);
+    if (!("onscrollend" in window)) settle = setTimeout(settled, 150);
+  }, { passive: true });
+  track.addEventListener("scrollend", settled);
+
+  // start on the first real photo; keep it there as images load or the window resizes
+  const home = () => { track.scrollLeft = x(n + current() % n); update(); };
+  track.scrollLeft = setWidth();
+  addEventListener("load", home);
+  addEventListener("resize", home);
 
   // drag to scroll with a mouse (touch already scrolls natively)
   let startX = 0, startLeft = 0, dragging = false;
