@@ -94,7 +94,7 @@ function setupIndex() {
   });
   section.addEventListener("mousemove", e => {
     const r = section.getBoundingClientRect();
-    peek.style.left = `${e.clientX - r.left + 150}px`;
+    peek.style.left = `${e.clientX - r.left + 210}px`;
     peek.style.top = `${e.clientY - r.top}px`;
   });
 }
@@ -161,8 +161,34 @@ function setupCarousel() {
   update();
 }
 
+/* ── 5. Crosshair cursor over the index ───────────────────────
+   Thin scarlet crosshairs across the whole index with a live (x, y)
+   readout, like reading a value off a plot. Mouse/trackpad only.   */
+function setupCrosshair() {
+  const section = document.querySelector(".projects");
+  if (!section || !matchMedia("(hover: hover) and (pointer: fine)").matches) return;
+  const h = Object.assign(document.createElement("li"), { className: "xh xh-h" });
+  const v = Object.assign(document.createElement("li"), { className: "xh xh-v" });
+  const dot = Object.assign(document.createElement("li"), { className: "xh-dot" });
+  const out = Object.assign(document.createElement("li"), { className: "xh-out" });
+  [h, v, dot, out].forEach(el => el.setAttribute("aria-hidden", "true"));
+  section.append(h, v, dot, out);
+  section.classList.add("has-xh");
+  section.addEventListener("mousemove", e => {
+    const r = section.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    h.style.transform = `translateY(${y}px)`;
+    v.style.transform = `translateX(${x}px)`;
+    dot.style.transform = out.style.transform = `translate(${x}px, ${y}px)`;
+    out.textContent = `(${(x / r.width).toFixed(2)}, ${(1 - y / r.height).toFixed(2)})`;
+    section.classList.add("xh-on");
+  });
+  section.addEventListener("mouseleave", () => section.classList.remove("xh-on"));
+}
+
 document.addEventListener("DOMContentLoaded", async () => {
   setupIndex();
+  setupCrosshair();
   setupCarousel();
   await loadFigure();
   if (isGameDay()) crossOutMs();

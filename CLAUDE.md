@@ -12,6 +12,7 @@ William Sorg's personal homepage: one static page on GitHub Pages. Statistics & 
 - Plain HTML/CSS/JS, with no framework, bundler, or npm dependencies, and no analytics or tracking.
 - Everything has to work when served statically from the repo root (GitHub Pages, `.nojekyll` present).
 - Respect `prefers-reduced-motion`, keep the semantic HTML and alt text, and keep the mobile layout working (check at 390px).
+- Project index uses a scarlet crosshair cursor with an (x, y) readout (setupCrosshair); mouse/trackpad only.
 - Easter egg: on Saturdays from September through Jan 20, `crossOutMs()` in `js/main.js` replaces every M and m with a scarlet X or x. Screen readers still get the original text. Preview it with `?gameday=1`.
 
 ## Workflow
