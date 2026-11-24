@@ -58,7 +58,7 @@ The project numbering (№ 001/006) and the entry count are generated automatica
 
 ## Adding a hero figure
 
-1. Make an SVG in the house style: ink `#111`, one accent in Ohio State scarlet `#BA0C2F`, thin strokes, lots of space, off-white `#fafaf7` background left transparent.
+1. Make an SVG in the house style: ink `#111`, one accent in Ohio State scarlet `#BB0000`, thin strokes, lots of space, off-white `#fafaf7` background left transparent.
 2. Save it to `art/`.
 3. Add it to the `FIGURES` list at the top of `js/main.js` with a one-line caption.
 

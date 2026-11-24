@@ -7,7 +7,7 @@
 /* ── Tokens ─────────────────────────────────────────────────── */
 :root{
   --bg:#fafaf7; --ink:#111; --grey:#8b8b86; --rule:#111;
-  --red:#BA0C2F;                 /* Ohio State scarlet */
+  --red:#BB0000;                 /* Ohio State scarlet */
   --pad:clamp(20px,4.4vw,64px);
   --gap:clamp(80px,10vw,150px);
   --serif:"Crimson Text",Georgia,serif;

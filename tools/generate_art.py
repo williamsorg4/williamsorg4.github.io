@@ -11,7 +11,7 @@ import os
 import random
 
 INK = "#111"
-RED = "#BA0C2F"
+RED = "#BB0000"
 GREY = "#8b8b86"
 OUT = os.path.join(os.path.dirname(__file__), "..", "art")
 
