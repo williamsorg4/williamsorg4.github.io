@@ -54,6 +54,10 @@ img,svg{display:block;max-width:100%;height:auto}
 .art .bar{transform-box:fill-box;transform-origin:bottom;transform:scaleY(0);animation:grow .9s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:calc(var(--i) * 6ms)}
 .art .late{opacity:0;animation:fade .6s ease forwards;animation-delay:var(--late,2.6s)}
 .art.walk-art .late{--late:6s}
+/* portrait map: limited by height, centred (svg keeps its default xMidYMid meet) */
+.art.map-art svg{display:block;margin:0 auto;height:min(75vh,818px);width:auto;max-width:100%}
+.art .d0,.art .d1,.art .d2,.art .d3,.art .d4{opacity:0;animation:fade .5s ease forwards;animation-delay:calc(var(--d) * 120ms + .2s)}
+.art .d0{--d:0}.art .d1{--d:1}.art .d2{--d:2}.art .d3{--d:3}.art .d4{--d:4}
 @keyframes draw{to{stroke-dashoffset:0}}
 @keyframes drop{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
 @keyframes grow{to{transform:scaleY(1)}}

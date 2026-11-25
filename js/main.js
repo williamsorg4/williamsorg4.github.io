@@ -3,11 +3,13 @@
 /* ── 1. Hero figures ──────────────────────────────────────────
    One is picked at random on each visit (never the same twice in a row).
    To add a figure: put an SVG in art/ and add an entry here.
-   `wide: true` gives landscape figures a little more room.         */
+   `wide: true` gives landscape figures a little more room.
+   Force one with ?fig=<id>, e.g. ?fig=bogota.                      */
 const FIGURES = [
-  { src: "art/galton.svg",          caption: "900 small decisions, one bell curve. The red one is me." },
-  { src: "art/random-walk.svg",     caption: "A random walk, five thousand steps so far. The next one is a PhD.", cls: "walk-art" },
-  { src: "art/heartbreak-hill.svg", caption: "Boston, mile 0 to 26.2. Everything worth doing has a hill around mile 20.", wide: true },
+  { id: "galton", src: "art/galton.svg",          caption: "900 small decisions, one bell curve. The red one is me." },
+  { id: "walk",   src: "art/random-walk.svg",     caption: "A random walk, five thousand steps so far. The next one is a PhD.", cls: "walk-art" },
+  { id: "hill",   src: "art/heartbreak-hill.svg", caption: "Boston, mile 0 to 26.2. Everything worth doing has a hill around mile 20.", wide: true },
+  { id: "bogota", src: "art/bogota-jobs.svg",     caption: "Job density in Bogota", cls: "map-art" },
 ];
 
 /* ── 2. Game day ──────────────────────────────────────────────
@@ -34,7 +36,8 @@ async function loadFigure() {
   if (!host) return;
   const last = storage("fig");
   const pool = FIGURES.length > 1 ? FIGURES.filter(f => f.src !== last) : FIGURES;
-  const fig = pool[Math.floor(Math.random() * pool.length)];
+  const forced = FIGURES.find(f => f.id === new URLSearchParams(location.search).get("fig"));
+  const fig = forced || pool[Math.floor(Math.random() * pool.length)];
   storage("fig", fig.src);
   cap.textContent = fig.caption;
   host.closest(".hero-art").classList.toggle("wide", !!fig.wide);
