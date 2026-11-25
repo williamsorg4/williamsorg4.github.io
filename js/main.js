@@ -9,7 +9,7 @@ const FIGURES = [
   { id: "galton", src: "art/galton.svg",          caption: "900 small decisions, one bell curve. The red one is me." },
   { id: "walk",   src: "art/random-walk.svg",     caption: "A random walk, five thousand steps so far. The next one is a PhD.", cls: "walk-art" },
   { id: "hill",   src: "art/heartbreak-hill.svg", caption: "Boston, mile 0 to 26.2. Everything worth doing has a hill around mile 20.", wide: true },
-  { id: "bogota", src: "art/bogota-jobs.svg",     caption: "Job density in Bogota", cls: "map-art" },
+  { id: "bogota", src: "art/bogota-jobs.svg",     caption: "Job density in Bogotá.", cls: "map-art" },
 ];
 
 /* ── 2. Game day ──────────────────────────────────────────────
@@ -68,13 +68,13 @@ function crossOutMs(root = document.body) {
     vis.setAttribute("aria-hidden", "true");
     for (const part of n.nodeValue.split(/([mM])/)) {
       if (part === "M" || part === "m") {
-        vis.append(Object.assign(document.createElement("span"), { className: "ox", textContent: part === "M" ? "X" : "x" }));
+        vis.append(Object.assign(document.createElement("span"), { className: "ox" }));  // drawn in CSS as a bold scarlet ❌
       } else if (part) vis.append(part);
     }
     wrap.append(sr, vis);
     n.replaceWith(wrap);
   }
-  document.title = document.title.replace(/M/g, "X").replace(/m/g, "x");
+  document.title = document.title.replace(/m/gi, "X");
 }
 
 /* ── 3. Index of work ─────────────────────────────────────────
