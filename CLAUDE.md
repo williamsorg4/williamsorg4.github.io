@@ -18,5 +18,4 @@ William Sorg's personal homepage: one static page on GitHub Pages. Statistics & 
 
 ## Workflow
 - Preview with `python3 -m http.server 8000`.
-- After changing `css/style.css` or `js/main.js`, bump the `?v=` number on their links in `index.html` so browsers drop the cached copy.
 - Commit with clear messages. Pushing to `main` deploys the site.

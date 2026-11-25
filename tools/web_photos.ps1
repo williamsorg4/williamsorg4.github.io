@@ -1,7 +1,9 @@
 # Make a web copy of a photo for the "Off the clock" carousel.
 #
 # From WSL, in the repo root:
-#   powershell.exe -File "$(wslpath -w tools/web_photos.ps1)" "$(wslpath -w photos/NAME.jpg)" "$(wslpath -w $PWD)\photos\web\name.jpg"
+#   powershell.exe -File "$(wslpath -w tools/web_photos.ps1)" "$(wslpath -w ~/Pictures/NAME.jpg)" "$(wslpath -w $PWD)\photos\name.jpg"
+#
+# Keep the full-size original outside the repo: everything in photos/ is published.
 #
 # Resizes to 900px tall (sharp at 2x for the 420px max display height), saves a
 # quality-82 JPEG, applies the EXIF rotation, and drops all metadata (GPS too).

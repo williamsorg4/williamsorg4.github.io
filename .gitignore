@@ -4,6 +4,3 @@ __pycache__/
 .vscode/
 *:Zone.Identifier
 
-# Full-size originals stay local; only the web copies are published
-photos/*
-!photos/web/
