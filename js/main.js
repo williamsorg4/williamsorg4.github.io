@@ -66,10 +66,16 @@ function crossOutMs(root = document.body) {
     const sr = Object.assign(document.createElement("span"), { className: "sr-only", textContent: n.nodeValue });
     const vis = document.createElement("span");
     vis.setAttribute("aria-hidden", "true");
-    for (const part of n.nodeValue.split(/([mM])/)) {
-      if (part === "M" || part === "m") {
-        vis.append(Object.assign(document.createElement("span"), { className: "ox" }));  // drawn in CSS as a bold scarlet ❌
-      } else if (part) vis.append(part);
+    // keep each word with an X in one unbreakable piece, so the X never strands on the line above
+    for (const word of n.nodeValue.split(/(\s+)/)) {
+      if (!/m/i.test(word)) { if (word) vis.append(word); continue; }
+      const w = Object.assign(document.createElement("span"), { className: "ox-w" });
+      for (const part of word.split(/([mM])/)) {
+        if (part === "M" || part === "m") {
+          w.append(Object.assign(document.createElement("span"), { className: "ox" }));  // drawn in CSS as a bold scarlet ❌
+        } else if (part) w.append(part);
+      }
+      vis.append(w);
     }
     wrap.append(sr, vis);
     n.replaceWith(wrap);
