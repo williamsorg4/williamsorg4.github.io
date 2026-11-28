@@ -7,7 +7,7 @@ index.html            the whole page
 css/style.css         all styles (colors and spacing are tokens at the top)
 js/main.js            hero figure rotation, project index, photo carousel, game-day easter egg
 art/                  hero figures (SVG) — one is picked at random on each visit
-tools/generate_art.py regenerates the figures in art/
+tools/generate_art.py regenerates the generated figures in art/ (Galton board, random walk)
 projects/             preview images for the Index of work (shown on hover)
 photos/               images for the "Off the clock" carousel
 cv/                   william-sorg-cv.pdf (placeholder — replace with the real one)
@@ -63,5 +63,3 @@ The project numbering (№ 001/006) and the entry count are generated automatica
 3. Add it to the `FIGURES` list at the top of `js/main.js` with a one-line caption.
 
 Optional load animations: give elements `class="walk"` with `pathLength="1"` (line draws itself), `class="ball"` / `class="bar"` with `style="--i:N"` (staggered entrance), or `class="late"` (fades in last).
-
-The Boston profile is currently stylised; to use your real course, export the GPX from Strava and replace `KEY` in `tools/generate_art.py`.

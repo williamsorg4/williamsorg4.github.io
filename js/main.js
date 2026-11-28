@@ -3,12 +3,13 @@
 /* ── 1. Hero figures ──────────────────────────────────────────
    One is picked at random on each visit (never the same twice in a row).
    To add a figure: put an SVG in art/ and add an entry here.
-   `wide: true` gives landscape figures a little more room.
+   `wide: true` gives landscape figures a little more room;
+   `init` runs once the SVG is inlined (e.g. a scripted entrance).
    Force one with ?fig=<id>, e.g. ?fig=bogota.                      */
 const FIGURES = [
   { id: "galton", src: "art/galton.svg",          caption: "900 small decisions, one bell curve. The red one is me." },
   { id: "walk",   src: "art/random-walk.svg",     caption: "A random walk, five thousand steps so far. The next one is a PhD.", cls: "walk-art" },
-  { id: "hill",   src: "art/heartbreak-hill.svg", caption: "Boston, mile 0 to 26.2. Everything worth doing has a hill around mile 20.", wide: true },
+  { id: "hill",   src: "art/boston-marathon-map.svg", caption: "Boston, mile 0 to 26.2. Everything worth doing has a hill around mile 20.", wide: true, cls: "boston-art", init: drawBoston },
   { id: "bogota", src: "art/bogota-jobs.svg",     caption: "Job density in Bogotá.", cls: "map-art" },
 ];
 
@@ -46,9 +47,50 @@ async function loadFigure() {
     const res = await fetch(fig.src);
     if (!res.ok) throw new Error(res.status);
     host.innerHTML = await res.text();             // inline so the load animation can run
+    const svg = host.querySelector("svg");
+    if (fig.init && svg) fig.init(svg);
   } catch {
     host.innerHTML = `<img src="${fig.src}" alt="">`; // e.g. opened from file:// — still shows, just no animation
   }
+}
+
+/* Boston course map: tracts fade in, then the course draws itself
+   Hopkinton → hills → Boylston as one line, then the labels fade in
+   (the fades and the hidden start state are CSS: .boston-art).
+   The ink .route holds two subpaths, before and after the hills; it is
+   split into two <path>s (path data copied as is) so each can be dashed
+   on its own, the same way in every browser.                        */
+function drawBoston(svg) {
+  svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const route = svg.querySelector(".route"), hills = svg.querySelector(".hills");
+  if (!route || !hills) return;
+  const [before, after] = route.getAttribute("d").split(/(?=M)/).map(s => s.trim()).filter(Boolean);
+  const pieces = [route, hills];
+  if (after) {
+    const rest = route.cloneNode();
+    route.setAttribute("d", before);
+    rest.setAttribute("d", after);
+    route.after(rest);                              // keeps the paint order: ink under the scarlet hills
+    pieces.push(rest);
+  }
+  const lens = pieces.map(p => p.getTotalLength());
+  const total = lens.reduce((a, b) => a + b, 0);
+  const DELAY = 400, DUR = 2200;                    // keep in step with .boston-art in css/style.css
+  const ease = t => t < .5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2;
+  const t0 = performance.now();
+  const frame = now => {
+    const t = Math.min(Math.max((now - t0 - DELAY) / DUR, 0), 1);
+    let at = ease(t) * total;                       // distance drawn along the whole course
+    pieces.forEach((p, i) => {
+      const f = Math.min(Math.max(at / lens[i], 0), 1);
+      at -= lens[i];
+      p.style.strokeDashoffset = 1 - f;
+      p.style.opacity = f > 0 ? 1 : 0;              // no stray round cap before a piece starts
+    });
+    if (t < 1) requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
 }
 
 function crossOutMs(root = document.body) {

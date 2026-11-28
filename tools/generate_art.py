@@ -100,44 +100,8 @@ def random_walk():
     write("random-walk.svg", svg(W, H, body, "A random walk from start to a scarlet dot labelled you are here"))
 
 
-def heartbreak_hill():
-    """Stylised Boston Marathon elevation profile (feet). Replace KEY with real
-    GPX elevations from Strava for the true course."""
-    KEY = [(0, 490), (2, 330), (4, 250), (6, 190), (8, 170), (10, 150), (12, 135), (14, 110), (16, 50),
-           (17.5, 120), (19, 105), (20.2, 150), (20.9, 235), (21.5, 190), (23, 110), (24.5, 60), (26.2, 15)]
-
-    def elev(mi):
-        for (a, ea), (c, ec) in zip(KEY, KEY[1:]):
-            if a <= mi <= c:
-                t = (mi - a) / (c - a)
-                t = t * t * (3 - 2 * t)
-                return ea + (ec - ea) * t
-        return KEY[-1][1]
-
-    W, H = 900, 530
-    X = lambda mi: 40 + mi / 26.2 * 820
-    Y = lambda e: 470 - e * 0.72
-    out = []
-    n = 330
-    for i in range(n + 1):
-        mi = i / n * 26.2
-        e = elev(mi) + math.sin(i * 1.7) * 2
-        col = RED if 19.9 <= mi <= 21.2 else INK
-        out.append(f'<line class="bar" style="--i:{i}" x1="{X(mi):.1f}" y1="470" x2="{X(mi):.1f}" y2="{Y(e):.1f}" '
-                   f'stroke="{col}" stroke-width=".9" opacity="{1 if col == RED else .85}"/>')
-    for mi in (0, 5, 10, 15, 20, 25, 26.2):
-        out.append(f'<text x="{X(mi):.1f}" y="494" font-size="11" fill="{GREY}" text-anchor="middle">{mi:g}</text>')
-    hx, hy = X(20.9), Y(elev(20.9))
-    out.append(f'<g class="late"><line x1="{hx:.1f}" y1="{hy - 10:.1f}" x2="{hx:.1f}" y2="{hy - 70:.1f}" stroke="{RED}" stroke-width="1"/>'
-               f'<text x="{hx:.1f}" y="{hy - 80:.1f}" font-size="11" fill="{RED}" text-anchor="middle">heartbreak hill</text></g>')
-    out.append(f'<text x="{X(0):.1f}" y="514" font-size="11" fill="{GREY}">Hopkinton</text>'
-               f'<text x="{X(26.2):.1f}" y="514" font-size="11" fill="{GREY}" text-anchor="end">Boylston St.</text>')
-    write("heartbreak-hill.svg", svg(W, H, "\n".join(out), "Elevation profile of the Boston Marathon with Heartbreak Hill in scarlet"))
-
-
 if __name__ == "__main__":
     os.makedirs(OUT, exist_ok=True)
     galton()
     random_walk()
-    heartbreak_hill()
     print("wrote", sorted(os.listdir(OUT)))

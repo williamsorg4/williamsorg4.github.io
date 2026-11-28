@@ -58,6 +58,11 @@ img,svg{display:block;max-width:100%;height:auto}
 .art.map-art svg{display:block;margin:0 auto;height:min(75vh,818px);width:auto;max-width:100%}
 .art .d0,.art .d1,.art .d2,.art .d3,.art .d4{opacity:0;animation:fade .5s ease forwards;animation-delay:calc(var(--d) * 120ms + .2s)}
 .art .d0{--d:0}.art .d1{--d:1}.art .d2{--d:2}.art .d3{--d:3}.art .d4{--d:4}
+/* Boston course map (js/main.js → drawBoston): tracts .4s, course draws .4s → 2.6s, labels from 2.9s */
+.art.boston-art svg{width:100%;height:auto}
+.art.boston-art #fig-boston>g{opacity:0;animation:fade .4s ease forwards}
+.art.boston-art #fig-boston :is(.route,.hills){stroke-dasharray:1;stroke-dashoffset:1}
+.art.boston-art #fig-boston>:is(text,circle,path:not(.route):not(.hills)){opacity:0;animation:fade .5s ease 2.9s forwards}
 @keyframes draw{to{stroke-dashoffset:0}}
 @keyframes drop{from{opacity:0;transform:translateY(-14px)}to{opacity:1;transform:none}}
 @keyframes grow{to{transform:scaleY(1)}}
