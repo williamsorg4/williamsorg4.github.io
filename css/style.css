@@ -112,7 +112,8 @@ img,svg{display:block;max-width:100%;height:auto}
 .carousel::-webkit-scrollbar{display:none}
 .carousel.dragging{cursor:grabbing;scroll-snap-type:none}
 .carousel.dragging img{pointer-events:none}
-.carousel figure{flex:0 0 auto;scroll-snap-align:start}
+/* position:relative keeps absolutely positioned children (game-day .sr-only text) inside the scroller, so they can't widen the page */
+.carousel figure{flex:0 0 auto;scroll-snap-align:start;position:relative}
 .carousel img{height:clamp(240px,32vw,420px);width:auto;user-select:none;-webkit-user-drag:none}
 /* tall/short/medium rhythm; js/main.js pins it per photo as .short/.medium so the loop copies match */
 .carousel:not(.looped) figure:nth-child(3n+2) img,.carousel figure.short img{height:clamp(180px,22vw,290px)}
