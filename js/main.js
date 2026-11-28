@@ -221,22 +221,101 @@ function setupCarousel() {
   addEventListener("load", home);
   addEventListener("resize", home);
 
-  // drag to scroll with a mouse (touch already scrolls natively)
-  let startX = 0, startLeft = 0, dragging = false;
+  // drag to scroll with a mouse (touch already scrolls natively).
+  // The drag only starts once the mouse has moved a few px, so a plain click still opens the photo.
+  let startX = 0, startLeft = 0, down = false, dragging = false;
   track.addEventListener("pointerdown", e => {
-    if (e.pointerType !== "mouse") return;
-    dragging = true; startX = e.clientX; startLeft = track.scrollLeft;
-    track.classList.add("dragging"); track.setPointerCapture(e.pointerId);
+    if (e.pointerType !== "mouse" || e.button !== 0) return;
+    down = true; startX = e.clientX; startLeft = track.scrollLeft;
   });
-  track.addEventListener("pointermove", e => { if (dragging) track.scrollLeft = startLeft - (e.clientX - startX); });
+  track.addEventListener("pointermove", e => {
+    if (!down) return;
+    if (!(e.buttons & 1)) { down = false; return; }       // released outside the window
+    if (!dragging && Math.abs(e.clientX - startX) > 5) {
+      dragging = true;
+      track.classList.add("dragging"); track.setPointerCapture(e.pointerId);  // captured, so no click lands on a photo
+    }
+    if (dragging) track.scrollLeft = startLeft - (e.clientX - startX);
+  });
   const end = () => {
+    down = false;
     if (!dragging) return;
     dragging = false; track.classList.remove("dragging");
     go(0);  // settle onto the nearest photo
   };
+
+  // click (or Enter on) a photo to enlarge it; closing leaves the carousel on the last photo viewed
+  const box = setupLightbox(real, i => track.scrollTo({ left: x(n + i), behavior: "smooth" }));
+  real.forEach(f => {
+    const img = f.querySelector("img");
+    img.tabIndex = 0;
+    img.setAttribute("role", "button");
+    img.setAttribute("aria-haspopup", "dialog");
+  });
+  track.addEventListener("click", e => {
+    const f = e.target.closest("figure");
+    if (f && track.contains(f)) box.open(figs.indexOf(f) % n);
+  });
+  track.addEventListener("keydown", e => {
+    if ((e.key === "Enter" || e.key === " ") && e.target.matches("img")) {
+      e.preventDefault();
+      box.open(figs.indexOf(e.target.closest("figure")) % n);
+    }
+  });
   track.addEventListener("pointerup", end);
   track.addEventListener("pointercancel", end);
   update();
+}
+
+/* Lightbox: one photo at a time, full screen, caption below.
+   ← → (buttons, arrow keys, or a swipe) cycle and wrap around; Esc, Close,
+   or a click on the empty space closes it. Built on <dialog>, so focus is
+   trapped while open and returns to the photo afterwards.           */
+function setupLightbox(photos, onClose) {
+  const n = photos.length;
+  const pad = k => String(k).padStart(2, "0");
+  const dlg = document.createElement("dialog");
+  dlg.className = "lightbox";
+  dlg.setAttribute("aria-label", "Photo viewer");
+  dlg.innerHTML = `
+    <div class="lb-bar"><span class="lb-pos"></span><button type="button" class="lb-close">Close</button></div>
+    <button type="button" class="lb-prev" aria-label="Previous photo">←</button>
+    <figure class="lb-fig"><img alt=""><figcaption></figcaption></figure>
+    <button type="button" class="lb-next" aria-label="Next photo">→</button>`;
+  document.body.append(dlg);
+  const img = dlg.querySelector(".lb-fig img"), cap = dlg.querySelector("figcaption"), pos = dlg.querySelector(".lb-pos");
+  const fig = dlg.querySelector(".lb-fig");
+  let i = 0;
+
+  const show = k => {
+    i = (k + n) % n;
+    const src = photos[i].querySelector("img"), text = photos[i].querySelector("figcaption");
+    img.src = src.currentSrc || src.src;
+    img.alt = src.alt;
+    cap.innerHTML = text ? text.innerHTML : "";      // copies the caption as shown (game-day Xs included)
+    pos.textContent = `${pad(i + 1)} / ${pad(n)}`;
+    [i - 1, i + 1].forEach(j => { new Image().src = photos[(j + n) % n].querySelector("img").src; });  // preload neighbours
+  };
+  const open = k => { show(k); if (!dlg.open) dlg.showModal(); };
+
+  dlg.querySelector(".lb-prev").addEventListener("click", () => show(i - 1));
+  dlg.querySelector(".lb-next").addEventListener("click", () => show(i + 1));
+  dlg.querySelector(".lb-close").addEventListener("click", () => dlg.close());
+  dlg.addEventListener("click", e => { if (e.target === dlg || e.target === fig) dlg.close(); });
+  dlg.addEventListener("keydown", e => {
+    if (e.key === "ArrowLeft") { e.preventDefault(); show(i - 1); }
+    if (e.key === "ArrowRight") { e.preventDefault(); show(i + 1); }
+  });
+  // swipe on touch screens
+  let sx = null;
+  dlg.addEventListener("pointerdown", e => { if (e.pointerType !== "mouse") sx = e.clientX; });
+  dlg.addEventListener("pointerup", e => {
+    if (sx === null) return;
+    const dx = e.clientX - sx; sx = null;
+    if (Math.abs(dx) > 40) show(i + (dx < 0 ? 1 : -1));
+  });
+  dlg.addEventListener("close", () => onClose(i));
+  return { open };
 }
 
 /* ── 5. Crosshair cursor over the index ───────────────────────
